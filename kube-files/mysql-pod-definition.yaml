@@ -4,7 +4,9 @@ metadata:
   name: mysql
   labels:
     name: mysql
+    namespace: final
 spec:
+  serviceAccountName: clo835
   containers:
   - name: mysql
     image: mysql
