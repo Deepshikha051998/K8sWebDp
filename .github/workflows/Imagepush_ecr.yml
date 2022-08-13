@@ -1,0 +1,57 @@
+# Workflow to build docker image of Cats code and push to Amazon ECR
+name: Deploy app image to aws ECR
+on:
+  pull_request:
+    branches: [ prod ]
+    paths:
+      - 'webapp/**'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+  
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Set $VERSION variable
+      id: version
+      run: echo ::set-output name=VERSION::$(echo $GITHUB_RUN_NUMBER)
+      
+
+    - name: Build, tag, and push the image to Amazon ECR for Cats app
+      id: build-image-cats
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: ${{ secrets.REPO_NAME }}
+        IMAGE_TAG: cats-v${{ steps.version.outputs.VERSION }}
+      run: |
+        cd webapp/
+        ls -ltra
+        # Build a docker image 
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        # Run the container to test
+        docker run -d -p 80:8080 --name webapp-image $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        # list all the containers
+        docker ps
+        echo " sleep 10 seconds for container to run"
+        sleep 10
+        # Push the docker image to ECR repository
+        echo "Pushing image to ECR..."
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
