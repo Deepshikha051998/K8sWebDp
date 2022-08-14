@@ -1,51 +1,57 @@
+# Workflow to build docker image of Cats code and push to Amazon ECR
 name: Deploy app image to aws ECR
-
 on:
-  push:
-    branches:
-      - staging
+  pull_request:
+    branches: [ dev ]
     paths:
-      - kube-files/webapp/*  
+      - 'webapp/**'
+
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
   
+
 jobs:
-  build:
-    name: Build Image
+  deploy:
+    name: Deploy
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v1
+    - name: Checkout
+      uses: actions/checkout@v2
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-        env: 
-          AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
-          AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-          AWS_SESSION_TOKEN: ${{secrets.AWS_SESSION_TOKEN}}
-          AWS_REGION: us-east-1
-          
-      - name: Seting up IMAGE_TAG variable
-        id: version
-        run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
-    
-      - name: Build, Test, Tag and push cats image to Amazon ECR
-        env: 
-          ECR_REGISTRY: ${{steps.login-ecr.outputs.registry}}
-          ECR_REPOSITORY: clo835
-          IMAGE_TAG: v1-${{ steps.version.outputs.VERSION }}
-          
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
 
-        run: |
-          cd kube-files/webapp
-          ls -ltra
-          # Build the docker image 
-          docker build -f ./Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          # Run the container to test
-          docker run -d -p 81:81 --name flask $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          # list all the containers
-          docker ps
-          echo " sleep 10 seconds for container to run"
-          sleep 10
-          # Push the docker image to ECR repository
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Set $VERSION variable
+      id: version
+      run: echo ::set-output name=VERSION::$(echo $GITHUB_RUN_NUMBER)
+      
+
+    - name: Build, tag, and push the image to Amazon ECR for Cats app
+      id: build-image-cats
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: ${{ secrets.REPO_NAME }}
+        IMAGE_TAG: webapp-v${{ steps.version.outputs.VERSION }}
+      run: |
+        cd webapp/
+        ls -ltra
+        # Build a docker image 
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        # Run the container to test
+        docker run -d -p 81:81 --name webapp-image $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        # list all the containers
+        docker ps
+        echo " sleep 10 seconds for container to run"
+        sleep 10
+        # Push the docker image to ECR repository
+        echo "Pushing image to ECR..."
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
