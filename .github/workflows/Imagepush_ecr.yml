@@ -2,7 +2,7 @@
 name: Deploy app image to aws ECR
 on:
   pull_request:
-    branches: [ prod ]
+    branches: [ staging ]
     paths:
       - 'webapp/**'
 
@@ -47,7 +47,7 @@ jobs:
         # Build a docker image 
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         # Run the container to test
-        docker run -d -p 80:8080 --name webapp-image $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker run -d -p 81:81 --name webapp-image $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         # list all the containers
         docker ps
         echo " sleep 10 seconds for container to run"
