@@ -2,10 +2,10 @@ name: Deploy Docker Image to ECR
 
 on: 
   push:
-    branches: [main]
+    branches: [staging]
 
 env:
-  IMAGE_TAG: v1.0
+  IMAGE_TAG: v2.0
 
 jobs:
   build:
@@ -28,12 +28,12 @@ jobs:
       - name: Build,test, tag and push image to Amazon ECR
         env: 
           ECR_REGISTRY: ${{steps.login-ecr.outputs.registry}}
-          ECR_REPOSITORY: team-final-project
+          ECR_REPOSITORY: clo835
           IMAGE_TAG: flask
           
       # Runs commands for flask container
         run: |
-          #cd cats/
+          #cd webapp/
           ls -ltra
           # Build the docker image 
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
