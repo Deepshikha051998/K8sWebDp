@@ -39,8 +39,8 @@ jobs:
       id: build-image-cats
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: ${{ secrets.REPO_NAME }}
-        IMAGE_TAG: webapp-v${{ steps.version.outputs.VERSION }}
+        ECR_REPOSITORY: clo835
+        IMAGE_TAG: v0.2
       run: |
         cd webapp/
         ls -ltra
