@@ -42,7 +42,7 @@ jobs:
         ECR_REPOSITORY: ${{ secrets.REPO_NAME }}
         IMAGE_TAG: cats-v${{ steps.version.outputs.VERSION }}
       run: |
-        cd webapp/
+        cd Kube-files/webapp/
         ls -ltra
         # Build a docker image 
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
