@@ -5,7 +5,7 @@ on:
     branches:
       - staging
     paths:
-      - webapp/*  
+      - kube-files/webapp/*  
   workflow_dispatch:
   
 jobs:
@@ -37,10 +37,10 @@ jobs:
           
 
         run: |
-          cd webapp
+          cd kube-files/webapp
           ls -ltra
           # Build the docker image 
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker build -f ./Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           # Run the container to test
           docker run -d -p 81:81 --name flask $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           # list all the containers
