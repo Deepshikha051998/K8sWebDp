@@ -5,7 +5,7 @@ on:
     branches:
       - staging
     paths:
-      - kube-files/webapp/*  
+      - webapp/*  
   workflow_dispatch:
   
 jobs:
@@ -37,7 +37,7 @@ jobs:
           
 
         run: |
-          cd kube-files/webapp
+          cd webapp
           ls -ltra
           # Build the docker image 
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
