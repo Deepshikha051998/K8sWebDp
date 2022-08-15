@@ -4,4 +4,4 @@ metadata:
   name: clo835
   annotations:
     eks.amazonaws.com/role-arn: arn:aws:iam::033892266598:role/clo835-service-account-role
-automountServiceAccountToken: false
+#automountServiceAccountToken: false

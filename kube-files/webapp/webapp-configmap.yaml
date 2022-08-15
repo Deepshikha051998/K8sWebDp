@@ -3,11 +3,16 @@ kind: ConfigMap
 metadata:
   name: webapp-config
 data:
+  IMAGE_URL_PATH: "/clo835/config/image_url"
+  IMAGE_URL_S3: "https://team-final-project.s3.amazonaws.com/"
+  GROUP: "Group-5"
+
   image_s3_url: |
     {  
       "success_img": "s3://team-final-project/success.jpg", 
       "failed_img": "s3://team-final-project/failed.png"
     }
-  team: Group-5
+  team: "Group-5"
 
-#  COLOR_ENV: "blue2"
+# COLOR_ENV: "blue2"
+# arn:aws:s3:::team-final-project
