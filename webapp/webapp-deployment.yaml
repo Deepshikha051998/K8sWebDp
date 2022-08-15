@@ -14,17 +14,44 @@ spec:
       labels:
         name: simple-webapp-mysql
     spec:
-      serviceAccountName: clo835
+      serviceAccountName: group5
       containers:
+        - name: copy-aws-cli
+          image: amazon/aws-cli:latest
+          command: ["/bin/sh","-c"]
+          args:
+          - aws s3 cp s3://team-final-project/failed.png /tmp/s3_image;
+            aws s3 cp s3://team-final-project/success.jpg /tmp/s3_image;
+            sleep 9999;
+          volumeMounts:
+          - name: s3-image
+            mountPath: /tmp/s3_image
+          ports:
+          - containerPort: 80
+
         - name: simple-webapp-mysql
-          #image: kodekloud/simple-webapp-mysql
-          image: 740081625158.dkr.ecr.us-east-1.amazonaws.com/clo835:v1.0
+          image: 033892266598.dkr.ecr.us-east-1.amazonaws.com/team-final-project:latest
           ports:
             - containerPort: 81
           envFrom:
             - secretRef:
                 name: db-secret
           env:
+            - name: IMAGE_URL_PATH
+              valueFrom: 
+                configMapKeyRef:
+                  name: webapp-config
+                  key: IMAGE_URL_PATH
+            - name: IMAGE_URL_S3
+              valueFrom: 
+                configMapKeyRef:
+                  name: webapp-config
+                  key: IMAGE_URL_S3
+            - name: GROUP
+              valueFrom: 
+                configMapKeyRef:
+                  name: webapp-config
+                  key:  GROUP
             - name: Team-Name
               valueFrom:
                 configMapKeyRef:
@@ -36,10 +63,19 @@ spec:
               readOnly: true
             - name: config-volume
               mountPath: /clo835/config
+            - name: s3-image
+              mountPath: /clo835/config/image_url
+              
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "cp /clo835/config/image_url/* static/"]
       volumes:
         - name: app-secret-volumes
           secret:
             secretName: db-secret
+        - name: s3-image
+          emptyDir: {}
         - name: config-volume
           configMap:
             name: webapp-config

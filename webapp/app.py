@@ -10,6 +10,9 @@ DB_Host = os.environ.get('MYSQL_SERVICE_HOST') or "localhost" # get environment 
 DB_Database = os.environ.get('DB_Database') or "mysql" 
 DB_User = os.environ.get('DB_User') or "root"
 DB_Password = os.environ.get('DB_Password') or "paswrd"
+GROUP = os.environ.get('GROUP')
+IMAGE_URL_PATH = os.environ.get('IMAGE_URL_PATH')
+IMAGE_URL_S3 = os.environ.get('IMAGE_URL_S3')
 
 @app.route("/")
 def main():
